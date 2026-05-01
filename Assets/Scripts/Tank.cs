@@ -1,8 +1,8 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Tank : MonoBehaviour
 {
-
     //INPUTS PLAYER 1:
     //Movement: A - D
     //Cannon rotation: Q - E
@@ -12,6 +12,9 @@ public class Tank : MonoBehaviour
     //Movement: J - L
     //Cannon rotation: U - O
     //Fire: I (longer pressed, more acceleration for the bullet)
+
+    [Header("Input")]
+    [SerializeField] private InputActionReference moveAction;
 
     [Header("Standard")]
     [SerializeField] private float width;
@@ -24,4 +27,17 @@ public class Tank : MonoBehaviour
     [SerializeField] private float restitutionCoefficient;
 
 
+    public void Move(Direction dir)
+    {
+        //Placeholder
+        float mov = 0;
+        if (dir == Direction.Left)
+            mov = -1;
+        if (dir == Direction.Right)
+            mov = 1;
+
+        Vector3 newPos = transform.position;
+        newPos.x += mov;
+        transform.position = newPos;
+    }
 }
