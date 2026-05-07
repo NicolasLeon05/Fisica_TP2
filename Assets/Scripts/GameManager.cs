@@ -34,6 +34,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKey(KeyCode.D))
             tank1.SetInput(Direction.Right);
 
+        //Cannon rotation
         if (Input.GetKey(KeyCode.Q))
             tank1.SetCannonInput(Direction.Left);
         else if (Input.GetKey(KeyCode.E))
@@ -41,36 +42,32 @@ public class GameManager : MonoBehaviour
         else
             tank1.ClearCannonInput();
 
-        if (Input.GetKeyDown(KeyCode.W)) // Fire
-        {
-
-        }
+        //Fire
+        if (Input.GetKeyDown(KeyCode.W))
+            tank1.StartChargingShot();
+        if (Input.GetKeyUp(KeyCode.W))
+            tank1.ReleaseShot();
 
         //Tank 2
-        if (Input.GetKeyDown(KeyCode.J)) // Move Left
+        if (Input.GetKeyDown(KeyCode.J)) //Move Left
         {
 
         }
-        if (Input.GetKeyDown(KeyCode.L)) // Move Right
+        if (Input.GetKeyDown(KeyCode.L)) //Move Right
         {
 
         }
-        if (Input.GetKeyDown(KeyCode.U)) // Rotate Left
+        if (Input.GetKeyDown(KeyCode.U)) //Rotate Left
         {
 
         }
-        if (Input.GetKeyDown(KeyCode.O)) // Rotate Right
+        if (Input.GetKeyDown(KeyCode.O)) //Rotate Right
         {
 
         }
-        if (Input.GetKeyDown(KeyCode.I)) // Fire
+        if (Input.GetKeyDown(KeyCode.I)) //Fire
         {
 
         }
-
-
-
-
-
     }
 }

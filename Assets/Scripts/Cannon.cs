@@ -4,6 +4,10 @@ public class Cannon : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Transform pivot;
+    [SerializeField] private GameObject bulletPrefab;
+
+    [Header("Fire")]
+    [SerializeField] private float maxLaunchSpeed = 5f;
 
     [Header("Visual / Collision")]
     [SerializeField] private float width = 1.5f;
@@ -26,13 +30,28 @@ public class Cannon : MonoBehaviour
         UpdateBounds();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         HandleRotation();
         UpdateTransform();
         UpdateBounds();
 
         rotationInput = 0f;
+    }
+
+    public void Fire(float powerPercent)
+    {
+        if (bulletPrefab == null)
+            return;
+
+        Vector2 direction = pivot.up;
+
+        float speed = maxLaunchSpeed * Mathf.Clamp01(powerPercent);
+
+        Vector2 initialVelocity = direction * speed;
+        Vector2 spawnPosition = (Vector2)transform.position + direction * (height / 2f);
+        GameObject bullet = Instantiate(bulletPrefab, spawnPosition, Quaternion.identity);
+        bullet.GetComponent<Bullet>().Initialize(initialVelocity, gameObject);
     }
 
     public void SetRotationInput(Direction dir)
@@ -52,7 +71,6 @@ public class Cannon : MonoBehaviour
     private void HandleRotation()
     {
         currentAngle += rotationInput * rotationSpeed * Time.deltaTime;
-
         currentAngle = Mathf.Clamp(currentAngle, -MAX_ANGLE, MAX_ANGLE);
 
         if (pivot != null)
@@ -75,10 +93,6 @@ public class Cannon : MonoBehaviour
 
     private void UpdateBounds()
     {
-        Bounds = new OBB(
-            transform.position,
-            new Vector2(width, height),
-            pivot != null ? pivot.eulerAngles.z : 0f
-        );
+        Bounds = new OBB(transform.position, new Vector2(width, height), pivot != null ? pivot.eulerAngles.z : 0f);
     }
 }

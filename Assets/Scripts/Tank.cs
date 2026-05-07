@@ -8,6 +8,11 @@ public class Tank : MonoBehaviour
     [Header("Standard")]
     [SerializeField] private Vector2 initialPosition;
 
+    [Header("Fire")]
+    [SerializeField] private float maxChargeTime = 2f;
+    private float currentCharge = 0f;
+    private bool chargingShot = false;
+
     [Header("Physics")]
     [SerializeField] private float movementAcceleration;
     [SerializeField] private float mass;
@@ -16,11 +21,40 @@ public class Tank : MonoBehaviour
     private float velocity = 0f;
     private float input = 0f;
 
-    private float cannonInput = 0f;
-
     private void Start()
     {
         transform.position = initialPosition;
+    }
+
+    private void FixedUpdate()
+    {
+        float dt = Time.fixedDeltaTime;
+
+        float force = input * movementAcceleration;
+        ClearInput();
+
+        float friction = 0f;
+        if (velocity != 0)
+            friction = -Mathf.Sign(velocity) * frictionCoefficient;
+
+        float acceleration = (force + friction) / mass;
+
+        float deltaX = velocity * dt + 0.5f * acceleration * dt * dt;
+        velocity += acceleration * dt;
+
+        if (Mathf.Abs(velocity) < 0.01f)
+            velocity = 0;
+
+        transform.position += new Vector3(deltaX, 0, 0);
+
+
+        if (chargingShot)
+        {
+            currentCharge += Time.deltaTime;
+
+            if (currentCharge > maxChargeTime)
+                currentCharge = maxChargeTime;
+        }
     }
 
     public void SetInput(Direction dir)
@@ -46,25 +80,23 @@ public class Tank : MonoBehaviour
             cannon.ClearRotationInput();
     }
 
-    private void FixedUpdate()
+    public void StartChargingShot()
     {
-        float dt = Time.fixedDeltaTime;
+        chargingShot = true;
+    }
 
-        float force = input * movementAcceleration;
-        ClearInput();
+    public void ReleaseShot()
+    {
+        if (!chargingShot)
+            return;
 
-        float friction = 0f;
-        if (velocity != 0)
-            friction = -Mathf.Sign(velocity) * frictionCoefficient;
+        Debug.Log("Shot released");
+        chargingShot = false;
 
-        float acceleration = (force + friction) / mass;
+        float powerPercent = Mathf.Clamp01(currentCharge / maxChargeTime);
 
-        float deltaX = velocity * dt + 0.5f * acceleration * dt * dt;
-        velocity += acceleration * dt;
+        cannon.Fire(powerPercent);
 
-        if (Mathf.Abs(velocity) < 0.01f)
-            velocity = 0;
-
-        transform.position += new Vector3(deltaX, 0, 0);
+        currentCharge = 0f;
     }
 }

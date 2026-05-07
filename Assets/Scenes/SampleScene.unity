@@ -864,6 +864,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Cannon
   pivot: {fileID: 31401996}
+  bulletPrefab: {fileID: 8507364994606435552, guid: 85c38df03c34a994c8f2d33abd93b858, type: 3}
+  maxLaunchSpeed: 15
   width: 0.4
   height: 1
   rotationSpeed: 100
@@ -1188,6 +1190,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Tank
   cannon: {fileID: 945201607}
   initialPosition: {x: -7.43, y: -1.43}
+  maxChargeTime: 2
   movementAcceleration: 10
   mass: 10
   frictionCoefficient: 5

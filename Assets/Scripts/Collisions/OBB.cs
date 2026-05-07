@@ -4,7 +4,7 @@ public class OBB
 {
     public Vector2 center;
     public Vector2 halfSize;
-    public float rotation; // en grados
+    public float rotation; //Degrees
 
     public OBB(Vector2 center, Vector2 size, float rotation)
     {
