@@ -7,11 +7,11 @@ public class Cannon : MonoBehaviour
     [SerializeField] private GameObject bulletPrefab;
 
     [Header("Fire")]
-    [SerializeField] private float maxLaunchSpeed = 5f;
+    [SerializeField] private float maxLaunchSpeed = 15f;
 
     [Header("Visual / Collision")]
-    [SerializeField] private float width = 1.5f;
-    [SerializeField] private float height = 0.3f;
+    [SerializeField] private float width;
+    [SerializeField] private float height;
 
     [Header("Rotation")]
     [SerializeField] private float rotationSpeed = 100f;

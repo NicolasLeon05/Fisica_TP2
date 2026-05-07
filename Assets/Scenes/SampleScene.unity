@@ -161,8 +161,9 @@ GameObject:
   m_Component:
   - component: {fileID: 225499875}
   - component: {fileID: 225499874}
+  - component: {fileID: 225499876}
   m_Layer: 0
-  m_Name: Wall (1)
+  m_Name: RightWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -236,12 +237,24 @@ Transform:
   m_GameObject: {fileID: 225499873}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.15, y: 0.04, z: 0}
+  m_LocalPosition: {x: 9.05, y: 0.04, z: 0}
   m_LocalScale: {x: 1, y: 11.974733, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &225499876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225499873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 875571d4eca4f4a48a79a8adb2f27efb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Wall
 --- !u!1 &335486332
 GameObject:
   m_ObjectHideFlags: 0
@@ -343,6 +356,7 @@ GameObject:
   m_Component:
   - component: {fileID: 514508782}
   - component: {fileID: 514508781}
+  - component: {fileID: 514508783}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Untagged
@@ -424,6 +438,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &514508783
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 514508780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efec978ce0902f24b8534238563b55b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Floor
+  friction: 0
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -707,10 +734,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   tank1: {fileID: 1816177826}
-  tank2: {fileID: 0}
-  floor: {fileID: 0}
-  wall1: {fileID: 0}
-  wall2: {fileID: 0}
+  tank2: {fileID: 905090179}
+  floor: {fileID: 514508783}
+  wall1: {fileID: 1764048646}
+  wall2: {fileID: 225499876}
 --- !u!4 &850901643
 Transform:
   m_ObjectHideFlags: 0
@@ -735,6 +762,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 905090178}
+  - component: {fileID: 905090179}
   m_Layer: 0
   m_Name: Player2
   m_TagString: Untagged
@@ -751,7 +779,7 @@ Transform:
   m_GameObject: {fileID: 905090177}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.01, y: -1.42, z: 0}
+  m_LocalPosition: {x: 7.43, y: -1.43, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -759,6 +787,24 @@ Transform:
   - {fileID: 646182508}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &905090179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 905090177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4835db1d5f7dcd34da8d38283c0746e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tank
+  cannon: {fileID: 1230221873}
+  initialPosition: {x: 7.43, y: -1.43}
+  maxChargeTime: 2
+  movementAcceleration: 10
+  mass: 10
+  frictionCoefficient: 5
 --- !u!1 &945201604
 GameObject:
   m_ObjectHideFlags: 0
@@ -879,6 +925,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1230221871}
   - component: {fileID: 1230221872}
+  - component: {fileID: 1230221873}
   m_Layer: 0
   m_Name: Cannon
   m_TagString: Untagged
@@ -895,8 +942,8 @@ Transform:
   m_GameObject: {fileID: 1230221870}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.47, z: 0}
-  m_LocalScale: {x: 0.41437215, y: 1.1049924, z: 0.581575}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 0.4, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 646182508}
@@ -960,6 +1007,24 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1230221873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1230221870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1478e84dac721d45912ad60d3b640a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Cannon
+  pivot: {fileID: 646182508}
+  bulletPrefab: {fileID: 8507364994606435552, guid: 85c38df03c34a994c8f2d33abd93b858, type: 3}
+  maxLaunchSpeed: 15
+  width: 0.4
+  height: 1
+  rotationSpeed: 100
 --- !u!1 &1303871243
 GameObject:
   m_ObjectHideFlags: 0
@@ -1061,8 +1126,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1764048645}
   - component: {fileID: 1764048644}
+  - component: {fileID: 1764048646}
   m_Layer: 0
-  m_Name: Wall
+  m_Name: LeftWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1142,6 +1208,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1764048646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1764048643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 875571d4eca4f4a48a79a8adb2f27efb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Wall
 --- !u!1 &1816177824
 GameObject:
   m_ObjectHideFlags: 0

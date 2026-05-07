@@ -26,6 +26,11 @@ public class Tank : MonoBehaviour
         transform.position = initialPosition;
     }
 
+    private void OnValidate()
+    {
+        transform.position = initialPosition;
+    }
+
     private void FixedUpdate()
     {
         float dt = Time.fixedDeltaTime;
