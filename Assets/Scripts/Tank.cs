@@ -1,43 +1,70 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class Tank : MonoBehaviour
 {
-    //INPUTS PLAYER 1:
-    //Movement: A - D
-    //Cannon rotation: Q - E
-    //Fire: W (longer pressed, more acceleration for the bullet)
-
-    //INPUTS PLAYER 2:
-    //Movement: J - L
-    //Cannon rotation: U - O
-    //Fire: I (longer pressed, more acceleration for the bullet)
-
-    [Header("Input")]
-    [SerializeField] private InputActionReference moveAction;
+    [Header("References")]
+    [SerializeField] private Cannon cannon;
 
     [Header("Standard")]
-    [SerializeField] private float width;
-    [SerializeField] private float height;
     [SerializeField] private Vector2 initialPosition;
 
     [Header("Physics")]
     [SerializeField] private float movementAcceleration;
     [SerializeField] private float mass;
-    [SerializeField] private float restitutionCoefficient;
+    [SerializeField] private float frictionCoefficient;
 
+    private float velocity = 0f;
+    private float input = 0f;
 
-    public void Move(Direction dir)
+    private float cannonInput = 0f;
+
+    private void Start()
     {
-        //Placeholder
-        float mov = 0;
-        if (dir == Direction.Left)
-            mov = -1;
-        if (dir == Direction.Right)
-            mov = 1;
+        transform.position = initialPosition;
+    }
 
-        Vector3 newPos = transform.position;
-        newPos.x += mov;
-        transform.position = newPos;
+    public void SetInput(Direction dir)
+    {
+        if (dir == Direction.Left) input = -1;
+        else if (dir == Direction.Right) input = 1;
+    }
+
+    public void ClearInput()
+    {
+        input = 0;
+    }
+
+    public void SetCannonInput(Direction dir)
+    {
+        if (cannon != null)
+            cannon.SetRotationInput(dir);
+    }
+
+    public void ClearCannonInput()
+    {
+        if (cannon != null)
+            cannon.ClearRotationInput();
+    }
+
+    private void FixedUpdate()
+    {
+        float dt = Time.fixedDeltaTime;
+
+        float force = input * movementAcceleration;
+        ClearInput();
+
+        float friction = 0f;
+        if (velocity != 0)
+            friction = -Mathf.Sign(velocity) * frictionCoefficient;
+
+        float acceleration = (force + friction) / mass;
+
+        float deltaX = velocity * dt + 0.5f * acceleration * dt * dt;
+        velocity += acceleration * dt;
+
+        if (Mathf.Abs(velocity) < 0.01f)
+            velocity = 0;
+
+        transform.position += new Vector3(deltaX, 0, 0);
     }
 }
