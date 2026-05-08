@@ -56,6 +56,13 @@ public static class Collision
         return distanceSquared <= circle.radius * circle.radius;
     }
 
+    public static bool CircleVsCircle(Circle a, Circle b)
+    {
+        Vector2 delta = b.center - a.center;
+        float radiusSum = a.radius + b.radius;
+        return delta.sqrMagnitude <= radiusSum * radiusSum;
+    }
+
     public static void ResolveBulletWall(Bullet bullet, Wall wall)
     {
         Vector2 velocity = bullet.Velocity;
@@ -71,6 +78,36 @@ public static class Collision
         else
             pos.x = wall.Bounds.Min.x - bullet.Radius;
 
+        bullet.transform.position = pos;
+    }
+
+    public static void ResolveBulletFloor(Bullet bullet, Floor floor)
+    {
+        Vector2 velocity = bullet.Velocity;
+
+        //Velocidad vertical (normal al piso)
+        float verticalSpeed = velocity.y;
+
+        //Resolver solo si la bala cae hacia el piso
+        if (verticalSpeed < 0f)
+        {
+            //Componente vertical (rebote)
+            velocity.y = -verticalSpeed * bullet.Restitution;
+
+            //Componente horizontal (friccion)
+            float frictionFactor = Mathf.Clamp01(1f - floor.Friction);
+            velocity.x *= frictionFactor;
+
+            //Evitar micro rebotes infinitos
+            if (Mathf.Abs(velocity.y) < 0.1f)
+                velocity.y = 0f;
+
+            bullet.Velocity = velocity;
+        }
+
+        //Correccion de penetracion
+        Vector3 pos = bullet.transform.position;
+        pos.y = floor.Bounds.Max.y + bullet.Radius;
         bullet.transform.position = pos;
     }
 }

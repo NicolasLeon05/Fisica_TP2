@@ -104,6 +104,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d081625287b34e49856d674e0bfe263, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bullet
-  mass: 22
+  mass: 5
   restitutionCoefficient: 0.6
   gravity: 9.8
