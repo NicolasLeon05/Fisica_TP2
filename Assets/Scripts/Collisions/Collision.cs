@@ -110,4 +110,49 @@ public static class Collision
         pos.y = floor.Bounds.Max.y + bullet.Radius;
         bullet.transform.position = pos;
     }
+
+    public static void ResolveBulletBullet(Bullet a, Bullet b)
+    {
+        Vector2 delta = (Vector2)(b.transform.position - a.transform.position);
+
+        float distance = delta.magnitude;
+        if (distance == 0f)
+            return;
+
+        //Normal de colision
+        Vector2 normal = delta / distance;
+
+        //Velocidad relativa
+        Vector2 relativeVelocity = b.Velocity - a.Velocity;
+
+        //Velocidad relativa sobre la normal
+        float normalSpeed = Vector2.Dot(relativeVelocity, normal);
+
+        //Ya se están separando
+        if (normalSpeed > 0f)
+            return;
+
+        //Restitucion efectiva
+        float restitution = Mathf.Min(a.Restitution, b.Restitution);
+
+        //Impulso
+        float impulseMagnitude = -(1f + restitution) * normalSpeed;
+        impulseMagnitude /= (1f / a.Mass) + (1f / b.Mass);
+        Vector2 impulse = impulseMagnitude * normal;
+
+        //Aplicar impulso
+        a.Velocity -= impulse / a.Mass;
+        b.Velocity += impulse / b.Mass;
+
+        //Corrección de penetracion
+        float penetration = (a.Radius + b.Radius) - distance;
+
+        if (penetration > 0f)
+        {
+            Vector2 correction = normal * (penetration * 0.5f);
+
+            a.transform.position -= (Vector3)correction;
+            b.transform.position += (Vector3)correction;
+        }
+    }
 }

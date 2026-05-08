@@ -82,7 +82,7 @@ public class GameManager : MonoBehaviour
     {
         CheckBulletWallCollisions();
         CheckBulletFloorCollisions();
-
+        CheckBulletBulletCollisions();
         // Bullet vs Bullet
         // Bullet vs Tank
         // Tank vs Tank
@@ -94,6 +94,7 @@ public class GameManager : MonoBehaviour
         activeBullets.Add(bullet);
     }
 
+    //Bullet-Wall
     private void CheckBulletWallCollisions()
     {
         foreach (Bullet bullet in activeBullets)
@@ -102,7 +103,6 @@ public class GameManager : MonoBehaviour
             CheckBulletWall(bullet, wall2);
         }
     }
-
     private void CheckBulletWall(Bullet bullet, Wall wall)
     {
         if (!Collision.CircleVsAABB(bullet.Bounds, wall.Bounds))
@@ -111,17 +111,40 @@ public class GameManager : MonoBehaviour
         Collision.ResolveBulletWall(bullet, wall);
     }
 
+
+    //Bullet-Floor
     private void CheckBulletFloorCollisions()
     {
         foreach (Bullet bullet in activeBullets)
             CheckBulletFloor(bullet, floor);
     }
-
     private void CheckBulletFloor(Bullet bullet, Floor floor)
     {
         if (!Collision.CircleVsAABB(bullet.Bounds, floor.Bounds))
             return;
 
         Collision.ResolveBulletFloor(bullet, floor);
+    }
+
+    //Bullet-Bullet
+    private void CheckBulletBulletCollisions()
+    {
+        for (int i = 0; i < activeBullets.Count; i++)
+        {
+            for (int j = i + 1; j < activeBullets.Count; j++)
+            {
+                Bullet a = activeBullets[i];
+                Bullet b = activeBullets[j];
+
+                CheckBulletBullet(a, b);
+            }
+        }
+    }
+    private void CheckBulletBullet(Bullet a, Bullet b)
+    {
+        if (!Collision.CircleVsCircle(a.Bounds, b.Bounds))
+            return;
+
+        Collision.ResolveBulletBullet(a, b);
     }
 }
