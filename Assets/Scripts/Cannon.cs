@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Cannon : MonoBehaviour
@@ -21,6 +22,7 @@ public class Cannon : MonoBehaviour
     private float currentAngle = 0f;
     private float rotationInput = 0f;
 
+    public static Action<Bullet> OnBulletSpawned;
     public OBB Bounds { get; private set; }
 
     private void OnValidate()
@@ -50,8 +52,12 @@ public class Cannon : MonoBehaviour
 
         Vector2 initialVelocity = direction * speed;
         Vector2 spawnPosition = (Vector2)transform.position + direction * (height / 2f);
+       
         GameObject bullet = Instantiate(bulletPrefab, spawnPosition, Quaternion.identity);
-        bullet.GetComponent<Bullet>().Initialize(initialVelocity, gameObject);
+        Bullet bulletComponent = bullet.GetComponent<Bullet>();
+        bulletComponent.Initialize(initialVelocity, gameObject);
+
+        OnBulletSpawned?.Invoke(bulletComponent);
     }
 
     public void SetRotationInput(Direction dir)
