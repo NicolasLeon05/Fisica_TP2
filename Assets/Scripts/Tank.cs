@@ -25,6 +25,9 @@ public class Tank : MonoBehaviour
 
     private float currentCharge = 0f;
     private bool chargingShot = false;
+    public bool IsChargingShot => chargingShot;
+    public float CurrentChargePercent =>
+        Mathf.Clamp01(currentCharge / maxChargeTime);
 
     private float velocity = 0f;
     private float input = 0f;

@@ -60,6 +60,21 @@ public class Cannon : MonoBehaviour
         OnBulletSpawned?.Invoke(bulletComponent);
     }
 
+    public Vector2 GetFireDirection()
+    {
+        return pivot.up;
+    }
+
+    public Vector2 GetSpawnPosition()
+    {
+        Vector2 direction = GetFireDirection();
+        return (Vector2)transform.position + direction * (height / 2f);
+    }
+
+    public float GetLaunchSpeed(float powerPercent)
+    {
+        return maxLaunchSpeed * Mathf.Clamp01(powerPercent);
+    }
     public void SetRotationInput(Direction dir)
     {
         if (dir == Direction.Left)
