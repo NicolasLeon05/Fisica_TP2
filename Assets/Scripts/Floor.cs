@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Floor : MonoBehaviour
 {
+    [Range(0, 1)]
     [SerializeField] private float friction;
 
     private Vector2 size;

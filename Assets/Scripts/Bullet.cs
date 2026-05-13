@@ -59,9 +59,7 @@ public class Bullet : MonoBehaviour
         Vector2 acceleration = new Vector2(0, -gravity);
 
         Vector2 deltaPos = velocity * dt + 0.5f * acceleration * dt * dt;
-
         velocity += acceleration * dt;
-
         transform.position += (Vector3)deltaPos;
     }
 }
