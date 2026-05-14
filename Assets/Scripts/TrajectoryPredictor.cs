@@ -10,7 +10,7 @@ public class TrajectoryPredictor : MonoBehaviour
 
     [Header("Simulation")]
     [SerializeField] private int maxIterations = 500;
-    [SerializeField] private float gravity = 9.8f;
+    private const float GRAVITY = 9.8f;
 
     [Header("Visual")]
     [SerializeField] private Transform marker;
@@ -48,7 +48,7 @@ public class TrajectoryPredictor : MonoBehaviour
 
         for (int i = 0; i < maxIterations; i++)
         {
-            Vector2 accel = Vector2.down * gravity;
+            Vector2 accel = Vector2.down * GRAVITY;
             Vector2 deltaPos = velocity * SimulationStep + 0.5f * accel * SimulationStep * SimulationStep;
 
             velocity += accel * SimulationStep;

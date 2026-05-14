@@ -20,6 +20,7 @@ public static class Collision
 
     public static bool OBBvsOBB(OBB a, OBB b)
     {
+        //Toma los 2 ejes de los 2 objetos
         Vector2[] axes = new Vector2[]
         {
             a.Right,
@@ -30,7 +31,7 @@ public static class Collision
 
         foreach (var axis in axes)
         {
-            if (!OverlapOnAxis(a, b, axis))
+            if (!OverlapOnAxis(a, b, axis)) //Si en algun eje no se overlapean, no colisionan
                 return false;
         }
 
@@ -42,18 +43,19 @@ public static class Collision
         Project(a, axis, out float minA, out float maxA);
         Project(b, axis, out float minB, out float maxB);
 
-        return !(maxA < minB || maxB < minA);
+        //Si hay una direccion donde no se tocan, no hay colision
+        return !(maxA < minB || maxB < minA); 
     }
 
     private static void Project(OBB box, Vector2 axis, out float min, out float max)
     {
         Vector2[] corners = box.GetCorners();
-
-        min = max = DotProduct(corners[0], axis);
+        max = DotProduct(corners[0], axis);
+        min = DotProduct(corners[0], axis);
 
         for (int i = 1; i < corners.Length; i++)
         {
-            float proj = DotProduct(corners[i], axis);
+            float proj = DotProduct(corners[i], axis); //Que tan lejos esta este punto en esa direccion
 
             if (proj < min)
                 min = proj;
@@ -224,15 +226,17 @@ public static class Collision
 
     public static void ResolveBulletWall(Bullet bullet, CollisionInfo info, float restitution)
     {
+        //Separa la bala de la pared
         bullet.transform.position += (Vector3)(info.normal * info.penetration);
 
+        //Calcula la velocidad en la normal de la colision
         Vector2 velocity = bullet.Velocity;
-
         float velocityAlongNormal = DotProduct(velocity, info.normal);
 
         if (velocityAlongNormal > 0f)
             return;
 
+        //Refleja la velocidad modificada por la restitucion respecto a la normal
         velocity -= (1f + restitution) * velocityAlongNormal * info.normal;
         bullet.Velocity = velocity;
     }
@@ -243,19 +247,24 @@ public static class Collision
 
     public static void ResolveBulletFloor(Bullet bullet, Floor floor, CollisionInfo info)
     {
+        //Separa la bala del piso
         bullet.transform.position += (Vector3)(info.normal * info.penetration);
 
+        //Calcula la velocidad en la normal de la colision
         Vector2 velocity = bullet.Velocity;
-
         float velocityAlongNormal = DotProduct(velocity, info.normal);
 
         if (velocityAlongNormal > 0f)
             return;
 
+        //Refleja la velocidad modificada por la restitucion respecto a la normal
         velocity -= (1f + bullet.Restitution) * velocityAlongNormal * info.normal;
+
+        //Calcula cuanta velocidad horizontal se pierde por la friccion
         float frictionFactor = 1f - floor.Friction;
         velocity.x *= frictionFactor;
 
+        //Evita rebote infinito
         if (Mathf.Abs(velocity.y) < 0.1f)
             velocity.y = 0f;
 

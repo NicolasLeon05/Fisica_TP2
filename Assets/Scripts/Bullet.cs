@@ -54,10 +54,12 @@ public class Bullet : MonoBehaviour
     {
         float dt = Time.fixedDeltaTime;
 
+        //Gravity acceleration
         Vector2 acceleration = new Vector2(0, -gravity);
 
+        //MRUV 
         Vector2 deltaPos = velocity * dt + 0.5f * acceleration * dt * dt;
-        velocity += acceleration * dt;
+        velocity += acceleration * dt; //vf = vi + a*T
         transform.position += (Vector3)deltaPos;
     }
 }

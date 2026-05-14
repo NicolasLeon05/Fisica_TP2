@@ -18,7 +18,10 @@ public class OBB
         get
         {
             float rad = rotation * Mathf.Deg2Rad;
-            return new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+            return new Vector2(
+                Mathf.Cos(rad),  //Componente horizontal | rotacion = 0 => 1 | rotacion = 90 => 0
+                Mathf.Sin(rad)); //Componente vertical   | rotacion = 0 => 0 | rotacion = 90 => 1
+            //rotacion = 0 => (1,0) | rotacion = 90 => (0,1)
         }
     }
 
@@ -27,7 +30,10 @@ public class OBB
         get
         {
             float rad = rotation * Mathf.Deg2Rad;
-            return new Vector2(-Mathf.Sin(rad), Mathf.Cos(rad));
+            return new Vector2( 
+                -Mathf.Sin(rad), //Componente horizontal | rad = 0 => 0 | rad = 90 => -1
+                Mathf.Cos(rad)); //Componente vertical   | rad = 0 => 1 | rad = 90 => 0
+            //rotacion = 0 => (0,1) | rotacion = 90 => (-1,0)
         }
     }
 

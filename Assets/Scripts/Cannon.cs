@@ -48,19 +48,16 @@ public class Cannon : MonoBehaviour
             return;
 
         Vector2 direction = pivot.up;
-
-
         Vector2 spawnPosition = (Vector2)transform.position + direction * (height / 2f);
 
         GameObject bullet = Instantiate(bulletPrefab, spawnPosition, Quaternion.identity);
         Bullet bulletComponent = bullet.GetComponent<Bullet>();
 
         float force = maxLaunchSpeed * Mathf.Clamp01(powerPercent);
-        float acceleration = force / bulletComponent.Mass;
-        Vector2 initialVelocity = direction * acceleration;
+        float acceleration = force / bulletComponent.Mass; //2da ley de Newton
+        Vector2 initialVelocity = direction * acceleration; //Divide la aceleracion en eje x e y
 
         bulletComponent.Initialize(initialVelocity, gameObject);
-
         OnBulletSpawned?.Invoke(bulletComponent);
     }
 

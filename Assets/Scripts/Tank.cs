@@ -70,13 +70,13 @@ public class Tank : MonoBehaviour
 
         if (Mathf.Abs(velocity) > 0.001f)
         {
-            // Fricción cinética
+            //Friccion cinetica
             frictionForce = -Mathf.Sign(velocity) * floor.Friction * normalForce;
         }
         else if (input != 0)
         {
-            // Fricción estática:
-            // impide movimiento si la fuerza aplicada no alcanza
+            //Friccion estatica:
+            //impide movimiento si la fuerza aplicada no supera la friccion
             float maxStaticFriction = floor.Friction * normalForce;
 
             if (Mathf.Abs(appliedForce) < maxStaticFriction)
@@ -88,20 +88,19 @@ public class Tank : MonoBehaviour
             frictionForce = -Mathf.Sign(appliedForce) * maxStaticFriction;
         }
 
-        // Fuerza neta
-        float netForce = appliedForce + frictionForce;
+        //Fuerza neta
+        float totalForce = appliedForce + frictionForce;
 
-        // Segunda ley de Newton
-        float acceleration = netForce / mass;
+        //Segunda ley de Newton
+        float acceleration = totalForce / mass;
 
-        // Integración
-        velocity += acceleration * dt;
+        //Integracion
+        velocity += acceleration * dt; //vf = vi + a*T
 
         if (input == 0 && Mathf.Abs(velocity) < 0.01f)
             velocity = 0f;
 
-        transform.position +=
-            Vector3.right * velocity * dt;
+        transform.position += Vector3.right * velocity * dt; //MRU xf = xi + v*T
 
         ResolveFloorConstraint();
 
