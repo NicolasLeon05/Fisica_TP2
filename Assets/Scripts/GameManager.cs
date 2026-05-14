@@ -94,7 +94,6 @@ public class GameManager : MonoBehaviour
     }
 
     // Bullet-Wall
-
     private void CheckBulletWallCollisions()
     {
         foreach (Bullet bullet in activeBullets)
@@ -106,14 +105,15 @@ public class GameManager : MonoBehaviour
 
     private void CheckBulletWall(Bullet bullet, Wall wall)
     {
-        if (!Collision.CircleVsAABB(bullet.Bounds, wall.Bounds))
+        Collision.CollisionInfo info = Collision.CircleVsAABB(bullet.Bounds, wall.Bounds);
+
+        if (!info.collision)
             return;
 
-        Collision.ResolveBulletWall(bullet, wall);
+        Collision.ResolveBulletWall(bullet, info, wall.RestitutionCoefficient);
     }
 
     // Bullet-Floor
-
     private void CheckBulletFloorCollisions()
     {
         foreach (Bullet bullet in activeBullets)
@@ -122,14 +122,15 @@ public class GameManager : MonoBehaviour
 
     private void CheckBulletFloor(Bullet bullet, Floor floor)
     {
-        if (!Collision.CircleVsAABB(bullet.Bounds, floor.Bounds))
+        Collision.CollisionInfo info = Collision.CircleVsAABB(bullet.Bounds, floor.Bounds);
+
+        if (!info.collision)
             return;
 
-        Collision.ResolveBulletFloor(bullet, floor);
+        Collision.ResolveBulletFloor(bullet, floor, info);
     }
 
     // Bullet-Bullet
-
     private void CheckBulletBulletCollisions()
     {
         for (int i = 0; i < activeBullets.Count; i++)
@@ -146,14 +147,15 @@ public class GameManager : MonoBehaviour
 
     private void CheckBulletBullet(Bullet a, Bullet b)
     {
-        if (!Collision.CircleVsCircle(a.Bounds, b.Bounds))
+        Collision.CollisionInfo info = Collision.CircleVsCircle(a.Bounds, b.Bounds);
+
+        if (!info.collision)
             return;
 
-        Collision.ResolveBulletBullet(a, b);
+        Collision.ResolveBulletBullet(a, b, info);
     }
 
     // Bullet-Tank
-
     private void CheckBulletTankCollisions()
     {
         for (int i = activeBullets.Count - 1; i >= 0; i--)
@@ -167,14 +169,22 @@ public class GameManager : MonoBehaviour
 
     private void CheckBulletTank(Bullet bullet, Tank tank)
     {
+        if (bullet == null || tank == null)
+            return;
+
         if (bullet.OriginGO == tank.Cannon.gameObject)
             return;
 
-        bool hitBody = Collision.CircleVsAABB(bullet.Bounds, tank.Bounds);
-        bool hitCannon = Collision.CircleVsOBB(bullet.Bounds, tank.Cannon.Bounds);
+        Collision.CollisionInfo info = Collision.CircleVsAABB(bullet.Bounds, tank.Bounds);
+        if (!info.collision)
+        {
+            info = Collision.CircleVsOBB(bullet.Bounds, tank.Cannon.Bounds);
 
-        if (!hitBody && !hitCannon)
-            return;
+            if (!info.collision)
+                return;
+        }
+
+        Collision.ResolveBulletTank(bullet, tank, info);
 
         activeBullets.Remove(bullet);
         Destroy(bullet.gameObject);
@@ -198,7 +208,6 @@ public class GameManager : MonoBehaviour
     }
 
     // Tank-Wall
-
     private void CheckTankWallCollisions()
     {
         CheckTankWall(tank1, wall1);

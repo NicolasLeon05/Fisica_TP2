@@ -9,24 +9,19 @@ public class TrajectoryPredictor : MonoBehaviour
     [SerializeField] private Wall wall2;
 
     [Header("Simulation")]
-    [SerializeField] private float simulationStep = 0.02f;
     [SerializeField] private int maxIterations = 500;
     [SerializeField] private float gravity = 9.8f;
 
-    [Header("Bullet")]
-    [SerializeField] private float bulletRadius = 0.2f;
-    [SerializeField]
-    [Range(0f, 1f)]
-    private float bulletRestitution = 0.8f;
-
     [Header("Visual")]
     [SerializeField] private Transform marker;
+
+    private float SimulationStep => Time.fixedDeltaTime;
 
     private void Update()
     {
         if (!tank.IsChargingShot)
         {
-            //marker.gameObject.SetActive(false);
+            marker.gameObject.SetActive(false);
             return;
         }
 
@@ -40,58 +35,73 @@ public class TrajectoryPredictor : MonoBehaviour
     {
         Cannon cannon = tank.Cannon;
 
-        Vector2 position = cannon.GetSpawnPosition();
+        Bullet bulletData = cannon.BulletPrefab;
 
-        Vector2 velocity = cannon.GetFireDirection() * cannon.GetLaunchSpeed(tank.CurrentChargePercent);
+        float bulletRadius = bulletData.Radius;
+        float bulletRestitution = bulletData.Restitution;
+        float bulletMass = bulletData.Mass;
+
+        Vector2 position = cannon.GetSpawnPosition();
+        float force =cannon.GetLaunchSpeed(tank.CurrentChargePercent);
+        float acceleration = force / bulletMass;
+        Vector2 velocity =cannon.GetFireDirection() *acceleration;
 
         for (int i = 0; i < maxIterations; i++)
         {
-            // MISMA integración que Bullet.cs
-            Vector2 acceleration = Vector2.down * gravity;
-            Vector2 deltaPos = velocity * simulationStep + 0.5f * acceleration * simulationStep * simulationStep;
+            Vector2 accel = Vector2.down * gravity;
+            Vector2 deltaPos = velocity * SimulationStep + 0.5f * accel * SimulationStep * SimulationStep;
 
-            velocity += acceleration * simulationStep;
+            velocity += accel * SimulationStep;
             position += deltaPos;
 
             Circle simulatedBullet = new Circle(position, bulletRadius);
 
             // FLOOR
-            if (Collision.CircleVsAABB(simulatedBullet, floor.Bounds))
+            Collision.CollisionInfo floorInfo = Collision.CircleVsAABB(simulatedBullet, floor.Bounds);
+
+            if (floorInfo.collision)
             {
-                if (velocity.y < 0f)
+                position += floorInfo.normal * floorInfo.penetration;
+
+                float velocityAlongNormal = Collision.DotProduct(velocity, floorInfo.normal);
+                if (velocityAlongNormal < 0f)
                 {
-                    velocity.y = -velocity.y * bulletRestitution;
+                    velocity -= (1f + bulletRestitution) * velocityAlongNormal * floorInfo.normal;
 
-                    float frictionFactor = Mathf.Clamp01(1f - floor.Friction);
-
+                    float frictionFactor = 1f - floor.Friction;
                     velocity.x *= frictionFactor;
 
                     if (Mathf.Abs(velocity.y) < 0.1f)
                         velocity.y = 0f;
                 }
-
-                position.y = floor.Bounds.Max.y + bulletRadius;
             }
+
 
             // LEFT WALL
+            Collision.CollisionInfo leftWallInfo = Collision.CircleVsAABB(simulatedBullet, wall1.Bounds);
 
-            if (Collision.CircleVsAABB(simulatedBullet, wall1.Bounds))
+            if (leftWallInfo.collision)
             {
-                velocity.x *= -1f;
+                position += leftWallInfo.normal * leftWallInfo.penetration;
 
-                position.x = wall1.Bounds.Max.x + bulletRadius;
+                float velocityAlongNormal = Collision.DotProduct(velocity, leftWallInfo.normal);
+                if (velocityAlongNormal < 0f)
+                    velocity -= (1f + wall1.RestitutionCoefficient) * velocityAlongNormal * leftWallInfo.normal;
             }
+
 
             // RIGHT WALL
+            Collision.CollisionInfo rightWallInfo = Collision.CircleVsAABB(simulatedBullet, wall2.Bounds);
 
-            if (Collision.CircleVsAABB(simulatedBullet, wall2.Bounds))
+            if (rightWallInfo.collision)
             {
-                velocity.x *= -1f;
+                position += rightWallInfo.normal * rightWallInfo.penetration;
 
-                position.x = wall2.Bounds.Min.x - bulletRadius;
+                float velocityAlongNormal = Collision.DotProduct(velocity, rightWallInfo.normal);
+                if (velocityAlongNormal < 0f)
+                    velocity -= (1f + wall2.RestitutionCoefficient) * velocityAlongNormal * rightWallInfo.normal;
             }
 
-            // TERMINÓ
 
             bool stoppedOnFloor =
                 Mathf.Abs(velocity.x) < 0.05f &&

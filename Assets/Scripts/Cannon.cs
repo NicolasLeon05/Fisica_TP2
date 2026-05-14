@@ -24,6 +24,7 @@ public class Cannon : MonoBehaviour
 
     public static Action<Bullet> OnBulletSpawned;
     public OBB Bounds { get; private set; }
+    public Bullet BulletPrefab =>bulletPrefab.GetComponent<Bullet>();
 
     private void OnValidate()
     {
@@ -48,13 +49,16 @@ public class Cannon : MonoBehaviour
 
         Vector2 direction = pivot.up;
 
-        float speed = maxLaunchSpeed * Mathf.Clamp01(powerPercent);
 
-        Vector2 initialVelocity = direction * speed;
         Vector2 spawnPosition = (Vector2)transform.position + direction * (height / 2f);
-       
+
         GameObject bullet = Instantiate(bulletPrefab, spawnPosition, Quaternion.identity);
         Bullet bulletComponent = bullet.GetComponent<Bullet>();
+
+        float force = maxLaunchSpeed * Mathf.Clamp01(powerPercent);
+        float acceleration = force / bulletComponent.Mass;
+        Vector2 initialVelocity = direction * acceleration;
+
         bulletComponent.Initialize(initialVelocity, gameObject);
 
         OnBulletSpawned?.Invoke(bulletComponent);

@@ -740,8 +740,6 @@ MonoBehaviour:
   simulationStep: 0.05
   maxIterations: 300
   gravity: 9.8
-  bulletRadius: 0.2
-  bulletRestitution: 0.6
   marker: {fileID: 1163787816}
 --- !u!4 &752175470
 Transform:
@@ -899,8 +897,6 @@ MonoBehaviour:
   simulationStep: 0.05
   maxIterations: 300
   gravity: 9.8
-  bulletRadius: 0.2
-  bulletRestitution: 0.6
   marker: {fileID: 8710793163033704106}
 --- !u!4 &930957119
 Transform:
@@ -1024,7 +1020,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Cannon
   pivot: {fileID: 31401996}
   bulletPrefab: {fileID: 8507364994606435552, guid: 85c38df03c34a994c8f2d33abd93b858, type: 3}
-  maxLaunchSpeed: 15
+  maxLaunchSpeed: 50
   width: 0.4
   height: 1
   rotationSpeed: 100
@@ -1199,8 +1195,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Cannon
   pivot: {fileID: 646182508}
-  bulletPrefab: {fileID: 8507364994606435552, guid: 85c38df03c34a994c8f2d33abd93b858, type: 3}
-  maxLaunchSpeed: 15
+  bulletPrefab: {fileID: 8507364994606435552, guid: 2675c035ef35d2b4aa839162b3ede07a, type: 3}
+  maxLaunchSpeed: 500
   width: 0.4
   height: 1
   rotationSpeed: 100

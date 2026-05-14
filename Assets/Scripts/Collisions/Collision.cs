@@ -2,10 +2,21 @@ using UnityEngine;
 
 public static class Collision
 {
-    private static float DotProduct(Vector2 a, Vector2 b)
+    public struct CollisionInfo
+    {
+        public bool collision;
+        public Vector2 normal;
+        public float penetration;
+    }
+
+    public static float DotProduct(Vector2 a, Vector2 b)
     {
         return a.x * b.x + a.y * b.y;
     }
+
+    //========================================================
+    // OBB vs OBB
+    //========================================================
 
     public static bool OBBvsOBB(OBB a, OBB b)
     {
@@ -37,6 +48,7 @@ public static class Collision
     private static void Project(OBB box, Vector2 axis, out float min, out float max)
     {
         Vector2[] corners = box.GetCorners();
+
         min = max = DotProduct(corners[0], axis);
 
         for (int i = 1; i < corners.Length; i++)
@@ -51,13 +63,17 @@ public static class Collision
         }
     }
 
+    //========================================================
+    // AABB vs AABB
+    //========================================================
+
     public static bool AABBvsAABB(AABB a, AABB b)
     {
         return
-           (a.Min.x <= b.Max.x &&
+            a.Min.x <= b.Max.x &&
             a.Max.x >= b.Min.x &&
             a.Min.y <= b.Max.y &&
-            a.Max.y >= b.Min.y);
+            a.Max.y >= b.Min.y;
     }
 
     public static bool OBBvsAABB(OBB obb, AABB aabb)
@@ -67,28 +83,97 @@ public static class Collision
         return OBBvsOBB(obb, converted);
     }
 
-    public static bool CircleVsAABB(Circle circle, AABB box)
+    //========================================================
+    // Circle vs Circle
+    //========================================================
+
+    public static CollisionInfo CircleVsCircle(Circle a, Circle b)
     {
+        CollisionInfo info = new CollisionInfo();
+
+        Vector2 delta = b.center - a.center;
+        float distance = delta.magnitude;
+        float radiusSum = a.radius + b.radius;
+
+        if (distance >= radiusSum)
+        {
+            info.collision = false;
+            return info;
+        }
+
+        info.collision = true;
+
+        if (distance > 0.0001f)
+            info.normal = delta.normalized;
+        else
+            info.normal = Vector2.right;
+
+        info.penetration = radiusSum - distance;
+
+        return info;
+    }
+
+    //========================================================
+    // Circle vs AABB
+    //========================================================
+
+    public static CollisionInfo CircleVsAABB(Circle circle, AABB box)
+    {
+        CollisionInfo info = new CollisionInfo();
+
         Vector2 closestPoint;
         closestPoint.x = Mathf.Clamp(circle.center.x, box.Min.x, box.Max.x);
         closestPoint.y = Mathf.Clamp(circle.center.y, box.Min.y, box.Max.y);
 
         Vector2 difference = circle.center - closestPoint;
+        float distance = difference.magnitude;
 
-        return difference.sqrMagnitude <= circle.radius * circle.radius;
+        if (distance > circle.radius)
+        {
+            info.collision = false;
+            return info;
+        }
+
+        info.collision = true;
+
+        if (distance > 0.0001f)
+        {
+            info.normal = difference.normalized;
+        }
+        else
+        {
+            float left = Mathf.Abs(circle.center.x - box.Min.x);
+            float right = Mathf.Abs(box.Max.x - circle.center.x);
+            float bottom = Mathf.Abs(circle.center.y - box.Min.y);
+            float top = Mathf.Abs(box.Max.y - circle.center.y);
+
+            float min = Mathf.Min(left, right, bottom, top);
+
+            if (min == left)
+                info.normal = Vector2.left;
+            else if (min == right)
+                info.normal = Vector2.right;
+            else if (min == bottom)
+                info.normal = Vector2.down;
+            else
+                info.normal = Vector2.up;
+        }
+
+        info.penetration = circle.radius - distance;
+
+        return info;
     }
 
-    public static bool CircleVsCircle(Circle a, Circle b)
-    {
-        Vector2 delta = b.center - a.center;
-        float radiusSum = a.radius + b.radius;
+    //========================================================
+    // Circle vs OBB
+    //========================================================
 
-        return delta.sqrMagnitude <= radiusSum * radiusSum;
-    }
-
-    public static bool CircleVsOBB(Circle circle, OBB box)
+    public static CollisionInfo CircleVsOBB(Circle circle, OBB box)
     {
+        CollisionInfo info = new CollisionInfo();
+
         Vector2 localCirclePosition = circle.center - box.center;
+
         float rad = -box.rotation * Mathf.Deg2Rad;
 
         Vector2 local;
@@ -100,81 +185,113 @@ public static class Collision
         closestPoint.y = Mathf.Clamp(local.y, -box.halfSize.y, box.halfSize.y);
 
         Vector2 difference = local - closestPoint;
+        float distance = difference.magnitude;
 
-        return difference.sqrMagnitude <= circle.radius * circle.radius;
-    }
-
-    public static void ResolveBulletWall(Bullet bullet, Wall wall)
-    {
-        Vector2 velocity = bullet.Velocity;
-        velocity.x *= -wall.RestitutionCoefficient;
-        bullet.Velocity = velocity;
-
-        Vector3 pos = bullet.transform.position;
-
-        if (velocity.x > 0)
-            pos.x = wall.Bounds.Max.x + bullet.Radius;
-        else
-            pos.x = wall.Bounds.Min.x - bullet.Radius;
-
-        bullet.transform.position = pos;
-    }
-
-    public static void ResolveBulletFloor(Bullet bullet, Floor floor)
-    {
-        Vector2 velocity = bullet.Velocity;
-        float verticalSpeed = velocity.y;
-
-        if (verticalSpeed < 0f)
+        if (distance > circle.radius)
         {
-            velocity.y = -verticalSpeed * bullet.Restitution;
-
-            float frictionFactor = 1f - floor.Friction;
-            velocity.x *= frictionFactor;
-
-            if (Mathf.Abs(velocity.y) < 0.1f)
-                velocity.y = 0f;
-
-            bullet.Velocity = velocity;
+            info.collision = false;
+            return info;
         }
 
-        Vector3 pos = bullet.transform.position;
-        pos.y = floor.Bounds.Max.y + bullet.Radius;
-        bullet.transform.position = pos;
+        info.collision = true;
+
+        if (distance > 0.0001f)
+        {
+            Vector2 localNormal = difference.normalized;
+
+            float cos = Mathf.Cos(-rad);
+            float sin = Mathf.Sin(-rad);
+
+            Vector2 worldNormal;
+            worldNormal.x = localNormal.x * cos - localNormal.y * sin;
+            worldNormal.y = localNormal.x * sin + localNormal.y * cos;
+
+            info.normal = worldNormal.normalized;
+        }
+        else
+        {
+            info.normal = Vector2.up;
+        }
+
+        info.penetration = circle.radius - distance;
+
+        return info;
     }
 
-    public static void ResolveBulletBullet(Bullet a, Bullet b)
-    {
-        Vector2 delta = (Vector2)(b.transform.position - a.transform.position);
-        float distance = delta.magnitude;
+    //========================================================
+    // Resolve Bullet Wall
+    //========================================================
 
-        if (distance == 0f)
+    public static void ResolveBulletWall(Bullet bullet, CollisionInfo info, float restitution)
+    {
+        bullet.transform.position += (Vector3)(info.normal * info.penetration);
+
+        Vector2 velocity = bullet.Velocity;
+
+        float velocityAlongNormal = DotProduct(velocity, info.normal);
+
+        if (velocityAlongNormal > 0f)
             return;
 
-        Vector2 normal = delta / distance;
-        Vector2 relativeVelocity = b.Velocity - a.Velocity;
-        float normalSpeed = DotProduct(relativeVelocity, normal);
+        velocity -= (1f + restitution) * velocityAlongNormal * info.normal;
+        bullet.Velocity = velocity;
+    }
 
-        if (normalSpeed > 0f)
+    //========================================================
+    // Resolve Bullet Floor
+    //========================================================
+
+    public static void ResolveBulletFloor(Bullet bullet, Floor floor, CollisionInfo info)
+    {
+        bullet.transform.position += (Vector3)(info.normal * info.penetration);
+
+        Vector2 velocity = bullet.Velocity;
+
+        float velocityAlongNormal = DotProduct(velocity, info.normal);
+
+        if (velocityAlongNormal > 0f)
+            return;
+
+        velocity -= (1f + bullet.Restitution) * velocityAlongNormal * info.normal;
+        float frictionFactor = 1f - floor.Friction;
+        velocity.x *= frictionFactor;
+
+        if (Mathf.Abs(velocity.y) < 0.1f)
+            velocity.y = 0f;
+
+        bullet.Velocity = velocity;
+    }
+
+    //========================================================
+    // Resolve Bullet Bullet
+    //========================================================
+
+    public static void ResolveBulletBullet(Bullet a, Bullet b, CollisionInfo info)
+    {
+        float totalMass = a.Mass + b.Mass;
+
+        Vector2 separation = info.normal * info.penetration;
+        a.transform.position -= (Vector3)(separation * (b.Mass / totalMass));
+        b.transform.position += (Vector3)(separation * (a.Mass / totalMass));
+
+        Vector2 relativeVelocity = b.Velocity - a.Velocity;
+        float velocityAlongNormal = DotProduct(relativeVelocity, info.normal);
+
+        if (velocityAlongNormal > 0f)
             return;
 
         float restitution = Mathf.Min(a.Restitution, b.Restitution);
-        float impulseMagnitude = -(1f + restitution) * normalSpeed;
+        float impulseMagnitude = -(1f + restitution) * velocityAlongNormal;
         impulseMagnitude /= (1f / a.Mass) + (1f / b.Mass);
 
-        Vector2 impulse = impulseMagnitude * normal;
+        Vector2 impulse = impulseMagnitude * info.normal;
         a.Velocity -= impulse / a.Mass;
         b.Velocity += impulse / b.Mass;
-
-        float penetration = (a.Radius + b.Radius) - distance;
-
-        if (penetration > 0f)
-        {
-            Vector2 correction = normal * (penetration * 0.5f);
-            a.transform.position -= (Vector3)correction;
-            b.transform.position += (Vector3)correction;
-        }
     }
+
+    //========================================================
+    // Resolve Tank Tank
+    //========================================================
 
     public static void ResolveTankTank(Tank a, Tank b)
     {
@@ -183,6 +300,23 @@ public static class Collision
             return;
 
         float normal = Mathf.Sign(distance);
+        float overlap = (a.Bounds.halfSize.x + b.Bounds.halfSize.x) - Mathf.Abs(distance);
+
+        if (overlap > 0f)
+        {
+            float totalMass = a.Mass + b.Mass;
+            float moveA = overlap * (b.Mass / totalMass);
+            float moveB = overlap * (a.Mass / totalMass);
+
+            Vector3 posA = a.transform.position;
+            Vector3 posB = b.transform.position;
+
+            posA.x -= moveA * normal;
+            posB.x += moveB * normal;
+
+            a.transform.position = posA;
+            b.transform.position = posB;
+        }
 
         float relativeVelocity = b.Velocity - a.Velocity;
 
@@ -192,27 +326,16 @@ public static class Collision
         float restitution = Mathf.Min(a.Restitution, b.Restitution);
 
         float impulse = -(1f + restitution) * relativeVelocity;
+
         impulse /= (1f / a.Mass) + (1f / b.Mass);
 
         a.Velocity -= impulse / a.Mass;
         b.Velocity += impulse / b.Mass;
-
-        float overlap = (a.Bounds.halfSize.x + b.Bounds.halfSize.x) - Mathf.Abs(distance);
-
-        if (overlap > 0f)
-        {
-            float correction = overlap * 0.5f;
-
-            Vector3 posA = a.transform.position;
-            Vector3 posB = b.transform.position;
-
-            posA.x -= correction * normal;
-            posB.x += correction * normal;
-
-            a.transform.position = posA;
-            b.transform.position = posB;
-        }
     }
+
+    //========================================================
+    // Resolve Tank Wall
+    //========================================================
 
     public static void ResolveTankWall(Tank tank, Wall wall)
     {
@@ -225,5 +348,24 @@ public static class Collision
 
         tank.transform.position = pos;
         tank.Velocity = 0f;
+    }
+
+    //========================================================
+    // Resolve Bullet Tank
+    //========================================================
+
+    public static void ResolveBulletTank(Bullet bullet, Tank tank, CollisionInfo info)
+    {
+        Vector2 separation = info.normal * info.penetration;
+        bullet.transform.position += (Vector3)separation;
+
+        Vector2 velocity = bullet.Velocity;
+        float velocityAlongNormal = DotProduct(velocity, info.normal);
+
+        if (velocityAlongNormal < 0f)
+        {
+            Vector2 reflected = velocity - (1f + bullet.Restitution) * velocityAlongNormal * info.normal;
+            bullet.Velocity = reflected;
+        }
     }
 }

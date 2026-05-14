@@ -4,10 +4,8 @@ public class Bullet : MonoBehaviour
 {
     [Header("Physics")]
     [SerializeField] private float mass;
-
     [Range(0, 1)]
     [SerializeField] private float restitutionCoefficient;
-
     [SerializeField] private float gravity = 9.8f;
 
     private GameObject originGO;
