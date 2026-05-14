@@ -2,6 +2,11 @@ using UnityEngine;
 
 public static class Collision
 {
+    private static float DotProduct(Vector2 a, Vector2 b)
+    {
+        return a.x * b.x + a.y * b.y;
+    }
+
     public static bool OBBvsOBB(OBB a, OBB b)
     {
         Vector2[] axes = new Vector2[]
@@ -32,11 +37,11 @@ public static class Collision
     private static void Project(OBB box, Vector2 axis, out float min, out float max)
     {
         Vector2[] corners = box.GetCorners();
-        min = max = Vector2.Dot(corners[0], axis);
+        min = max = DotProduct(corners[0], axis);
 
         for (int i = 1; i < corners.Length; i++)
         {
-            float proj = Vector2.Dot(corners[i], axis);
+            float proj = DotProduct(corners[i], axis);
 
             if (proj < min)
                 min = proj;
@@ -124,7 +129,7 @@ public static class Collision
         {
             velocity.y = -verticalSpeed * bullet.Restitution;
 
-            float frictionFactor = Mathf.Clamp01(1f - floor.Friction);
+            float frictionFactor = 1f - floor.Friction;
             velocity.x *= frictionFactor;
 
             if (Mathf.Abs(velocity.y) < 0.1f)
@@ -148,7 +153,7 @@ public static class Collision
 
         Vector2 normal = delta / distance;
         Vector2 relativeVelocity = b.Velocity - a.Velocity;
-        float normalSpeed = Vector2.Dot(relativeVelocity, normal);
+        float normalSpeed = DotProduct(relativeVelocity, normal);
 
         if (normalSpeed > 0f)
             return;
