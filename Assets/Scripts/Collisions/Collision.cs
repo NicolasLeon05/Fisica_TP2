@@ -218,7 +218,7 @@ public static class Collision
     {
         Vector3 pos = tank.transform.position;
 
-        if (tank.Velocity > 0)
+        if (tank.transform.position.x < wall.Bounds.center.x)
             pos.x = wall.Bounds.Min.x - tank.Bounds.halfSize.x;
         else
             pos.x = wall.Bounds.Max.x + tank.Bounds.halfSize.x;
